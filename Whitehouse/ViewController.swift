@@ -26,15 +26,16 @@ class ViewController: UITableViewController {
             //urlString = "https://www.hackingwithswift.com/samples/petitions-2.json"
         }
         
-        if let url = URL(string: urlString) {
-            if let data = try? Data(contentsOf: url) {
-                parse(json: data)
-            } else {
-                showError()
+        DispatchQueue.global(qos: .userInitiated).async {
+            if let url = URL(string: urlString) {
+                if let data = try? Data(contentsOf: url) {
+                    self.parse(json: data)
+                    return
+                }
             }
-        } else {
-            showError()
+            self.showError()
         }
+        
         
         navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Credits", style: .plain, target: self, action: #selector(showCredits))
                
@@ -42,9 +43,11 @@ class ViewController: UITableViewController {
     }
     
     @objc func showCredits() {
-        let ac = UIAlertController(title: "Credits", message: "The data comes from the We The People API of the Whitehouse.", preferredStyle: .alert)
-        ac.addAction(UIAlertAction(title: "OK", style: .default))
-        present(ac, animated: true)
+        DispatchQueue.main.async {
+            let ac = UIAlertController(title: "Credits", message: "The data comes from the We The People API of the Whitehouse.", preferredStyle: .alert)
+            ac.addAction(UIAlertAction(title: "OK", style: .default))
+            self.present(ac, animated: true)
+        }        
     }
     
     @objc func showFilterText() {
@@ -74,11 +77,14 @@ class ViewController: UITableViewController {
         if let jsonPetitions = try? decoder.decode(Petitions.self, from: json) {
             petitions = jsonPetitions.results
             filteresPetitions = petitions
-            tableView.reloadData()
-            return
+            
+            DispatchQueue.main.async {
+                self.tableView.reloadData()
+            }
+            //return
         }
         
-        showError()
+        //showError()
     }
 
     func showError() {
