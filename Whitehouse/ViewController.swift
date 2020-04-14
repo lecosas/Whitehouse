@@ -47,7 +47,7 @@ class ViewController: UITableViewController {
             let ac = UIAlertController(title: "Credits", message: "The data comes from the We The People API of the Whitehouse.", preferredStyle: .alert)
             ac.addAction(UIAlertAction(title: "OK", style: .default))
             self.present(ac, animated: true)
-        }        
+        }
     }
     
     @objc func showFilterText() {
@@ -66,9 +66,18 @@ class ViewController: UITableViewController {
         /*filteresPetitions = petitions.filter { (petition) -> Bool in
             return petition.body.localizedCaseInsensitiveContains(expression) || petition.title.localizedCaseInsensitiveContains(expression)
         }*/
-        filteresPetitions = petitions.filter { $0.body.localizedCaseInsensitiveContains(expression) || $0.title.localizedCaseInsensitiveContains(expression)
+            
+        DispatchQueue.global(qos: .userInitiated).async {
+            self.filteresPetitions = self.petitions.filter {
+                $0.body.localizedCaseInsensitiveContains(expression) || $0.title.localizedCaseInsensitiveContains(expression)
+            }
+            
+            DispatchQueue.main.async {
+                self.tableView.reloadData()
+            }
         }
-        tableView.reloadData()
+        
+        
     }
     
     func parse(json: Data) {
